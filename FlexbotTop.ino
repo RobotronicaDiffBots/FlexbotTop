@@ -5,6 +5,9 @@
 //Global constants
 int light_pins[3] = {3, 5, 6};
 int servo_pins[3] = {9, 10, 11};
+//roughly 1 rotation either way
+int servo_min[3] = {1250, 1250, 1250};
+int servo_max[3] = {1750, 1750, 1750};
 int IRled_pin = 7;
 
 radio_message_t radioMessage;
@@ -254,11 +257,13 @@ void updateState() {
 
 //Sets the servo levels
 void setServos() {
+  Serial.print("Servo Write");
   for (int i = 0; i < 3; i++) {
-    servos[i].write(servoDemands[i]);
+    int ms = map(servoDemands[i], 0, 180, servo_min[i], servo_max[i]);
+    servos[i].writeMicroseconds(ms);
+    Serial.print(" "); Serial.print(ms); 
   }
-  Serial.print("Servo Write "); Serial.print(servoDemands[0]); Serial.print(" "); Serial.print(servoDemands[1]); Serial.print(servoDemands[2]); Serial.println();
-
+  Serial.println();
 }
  
 void setup() {
@@ -267,12 +272,7 @@ void setup() {
   
   for (int i = 0; i < 3; i++) {
     pinMode(light_pins[i], OUTPUT);
-  }
-  
-  for (int i = 0; i < 3; i++) {
-    // For winch servos
-    //650 - 2350 is safe, but does 7 rotations
-    servos[i].attach(servo_pins[i], 1000, 2000);
+    servos[i].attach(servo_pins[i]);
   }
   
   //Needed an extra ground
